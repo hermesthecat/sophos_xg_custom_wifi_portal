@@ -10,6 +10,7 @@ ini_set('display_errors', 1);
 
 // Sophos XG API Yapılandırması
 $config = [
+    'group_name' => 'GuestUsers',  // Misafir kullanıcı grubu adı
     'firewall_ip' => '192.168.1.1', // Sophos XG Firewall IP adresi
     'username' => 'admin',          // API kullanıcı adı
     'password' => 'password',       // API şifresi
@@ -62,7 +63,7 @@ function createTemporaryUser($client, $userData)
                 'email' => $userData['email'],
                 'mobile' => $userData['phone'],
                 'custom_field1' => $userData['tckn'], // TCKN bilgisi
-                'groupname' => 'GuestUsers',
+                'groupname' => $GLOBALS['config']['group_name'],
                 'access_time' => $GLOBALS['config']['access_time'] * 3600 // Saniye cinsinden süre
             ]
         ]);
