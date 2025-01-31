@@ -63,6 +63,18 @@
       <h1>Wifi Misafir Portalı</h1>
       <form action="register.php" method="POST">
         <div class="form-group">
+          <label for="tckn">T.C. Kimlik No:</label>
+          <input
+            type="text"
+            id="tckn"
+            name="tckn"
+            pattern="[0-9]{11}"
+            minlength="11"
+            maxlength="11"
+            required
+          />
+        </div>
+        <div class="form-group">
           <label for="name">Ad Soyad:</label>
           <input type="text" id="name" name="name" required />
         </div>

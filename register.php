@@ -48,7 +48,7 @@ function createSoapClient($config)
 // Geçici kullanıcı oluştur
 function createTemporaryUser($client, $userData)
 {
-    $username = 'misafir_' . strtolower(str_replace(' ', '', $userData['name']));
+    $username = 'misafir_' . $userData['tckn']; // TCKN'yi misafir_ öneki ile kullan
     $password = bin2hex(random_bytes(4)); // 8 karakterlik rastgele şifre
 
     try {
@@ -61,6 +61,7 @@ function createTemporaryUser($client, $userData)
                 'name' => $userData['name'],
                 'email' => $userData['email'],
                 'mobile' => $userData['phone'],
+                'custom_field1' => $userData['tckn'], // TCKN bilgisi
                 'groupname' => 'GuestUsers',
                 'access_time' => $GLOBALS['config']['access_time'] * 3600 // Saniye cinsinden süre
             ]
@@ -82,13 +83,42 @@ function createTemporaryUser($client, $userData)
 // Form gönderildi mi kontrol et
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userData = [
+        'tckn' => filter_input(INPUT_POST, 'tckn', FILTER_SANITIZE_STRING),
         'name' => filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING),
         'email' => filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL),
         'phone' => filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_STRING)
     ];
 
-    // Tüm alanların dolu olduğunu kontrol et
-    if (!empty($userData['name']) && !empty($userData['email']) && !empty($userData['phone'])) {
+    // TCKN doğrulaması
+    function validateTCKN($tckn)
+    {
+        if (strlen($tckn) != 11) return false;
+        if (!ctype_digit($tckn)) return false;
+        if ($tckn[0] == '0') return false;
+
+        $digits = str_split($tckn);
+        $sum1 = 0;
+        $sum2 = 0;
+
+        for ($i = 0; $i < 9; $i++) {
+            if ($i % 2 == 0) {
+                $sum1 += $digits[$i];
+            } else {
+                $sum2 += $digits[$i];
+            }
+        }
+
+        $digit10 = ($sum1 * 7 - $sum2) % 10;
+        $digit11 = ($sum1 + $sum2 + $digits[9]) % 10;
+
+        return ($digit10 == $digits[9] && $digit11 == $digits[10]);
+    }
+
+    // Tüm alanların dolu olduğunu ve TCKN'nin geçerli olduğunu kontrol et
+    if (
+        !empty($userData['tckn']) && validateTCKN($userData['tckn']) &&
+        !empty($userData['name']) && !empty($userData['email']) && !empty($userData['phone'])
+    ) {
         $client = createSoapClient($config);
         $result = createTemporaryUser($client, $userData);
 
@@ -165,7 +195,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Kullanıcı oluşturma hatası: " . $result['error'];
         }
     } else {
-        $error = "Lütfen tüm alanları doldurun.";
+        if (!empty($userData['tckn']) && !validateTCKN($userData['tckn'])) {
+            $error = "Geçersiz T.C. Kimlik Numarası.";
+        } else {
+            $error = "Lütfen tüm alanları doldurun.";
+        }
     }
 }
 
