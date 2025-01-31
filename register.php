@@ -14,7 +14,7 @@ $config = [
     'username' => 'admin',          // API kullanıcı adı
     'password' => 'password',       // API şifresi
     'port' => '4444',              // Varsayılan Sophos API portu
-    'access_time' => 24            // Saat cinsinden erişim süresi
+    'access_time' => 4            // Saat cinsinden erişim süresi
 ];
 
 // SOAP istemcisi oluştur
@@ -48,7 +48,7 @@ function createSoapClient($config)
 // Geçici kullanıcı oluştur
 function createTemporaryUser($client, $userData)
 {
-    $username = strtolower(str_replace(' ', '', $userData['name'])) . rand(100, 999);
+    $username = 'misafir_' . strtolower(str_replace(' ', '', $userData['name']));
     $password = bin2hex(random_bytes(4)); // 8 karakterlik rastgele şifre
 
     try {

@@ -15,6 +15,7 @@ Bu uygulama, Sophos XG Firewall üzerinde geçici wifi kullanıcıları oluştur
 
 1. Dosyaları web sunucunuza yükleyin
 2. `register.php` dosyasındaki yapılandırma ayarlarını düzenleyin:
+
    ```php
    $config = [
        'firewall_ip' => 'SOPHOS_XG_IP_ADRESI',
